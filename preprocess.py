@@ -23,3 +23,20 @@ for user_id, group in df_by_user:
     user_item_matrix[user_id - 1, movie_id_to_order[group.movieId.values]] = group.rating.values
 
 scipy.sparse.save_npz("user_item_matrix", user_item_matrix)
+
+print("A")
+user_item_matrix = user_item_matrix.todense()
+print("B")
+# Normalize each row separate
+max_arr = user_item_matrix.max(axis=1)
+min_arr = np.where(user_item_matrix == 0, user_item_matrix.max(), user_item_matrix).min(axis=1)
+print("C")
+row_idx, col_idx = user_item_matrix.nonzero()
+user_item_matrix_normalized = scipy.sparse.csr_matrix((no_of_user, no_of_item))
+print("D")
+print(row_idx.shape)
+for row, col in zip(row_idx, col_idx):
+	element = user_item_matrix[row, col]
+	user_item_matrix_normalized[row, col] = 2 * ((element - min_arr[row]) / (max_arr[row] - min_arr[row])) - 1
+print("E")
+scipy.sparse.save_npz("user_item_matrix_normalized", user_item_matrix_normalized)
